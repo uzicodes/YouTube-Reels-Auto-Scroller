@@ -1,39 +1,70 @@
-// Auto-scroll YouTube video page with toggle button and video end detection
+// Auto-scroll to next reel/video after current finishes, allow manual scroll
 let autoScrollActive = false;
-let scrollInterval = null;
 let videoElement = null;
+let observer = null;
 
 function findVideoElement() {
-  // YouTube uses 'video' tag for the player
   return document.querySelector('video');
 }
 
-function autoScroll() {
-  // Only scroll if video is playing and not ended
-  if (videoElement && !videoElement.ended && !videoElement.paused) {
-    window.scrollBy({ top: 100, left: 0, behavior: 'smooth' });
+function scrollToNextReel() {
+  // Try to find the next reel/video element and scroll to it
+  // For YouTube Shorts/Reels, next video is usually below
+  // This logic may need adjustment for different layouts
+  const reels = document.querySelectorAll('ytd-reel-video-renderer, ytd-rich-item-renderer, ytd-video-renderer');
+  let foundCurrent = false;
+  for (let reel of reels) {
+    if (foundCurrent) {
+      reel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (reel.contains(videoElement)) {
+      foundCurrent = true;
+    }
   }
-  // Stop auto-scroll if video ended
-  if (videoElement && videoElement.ended) {
-    stopAutoScroll();
-    toggleBtn.textContent = 'Start Auto-Scroll';
-    autoScrollActive = false;
+  // Fallback: scroll down by a large amount
+  window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' });
+}
+
+function onVideoEnded() {
+  if (autoScrollActive) {
+    scrollToNextReel();
+    setTimeout(() => {
+      videoElement = findVideoElement();
+      if (videoElement) {
+        videoElement.removeEventListener('ended', onVideoEnded);
+        videoElement.addEventListener('ended', onVideoEnded);
+      }
+    }, 2000);
   }
 }
 
 function startAutoScroll() {
-  if (!scrollInterval) {
-    videoElement = findVideoElement();
-    if (videoElement) {
-      scrollInterval = setInterval(autoScroll, 2000);
-    }
+  videoElement = findVideoElement();
+  if (videoElement) {
+    videoElement.addEventListener('ended', onVideoEnded);
+  }
+  // Observe for video changes (e.g., when user scrolls manually)
+  if (!observer) {
+    observer = new MutationObserver(() => {
+      let newVideo = findVideoElement();
+      if (newVideo !== videoElement) {
+        if (videoElement) videoElement.removeEventListener('ended', onVideoEnded);
+        videoElement = newVideo;
+        if (videoElement) videoElement.addEventListener('ended', onVideoEnded);
+      }
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 }
 
 function stopAutoScroll() {
-  if (scrollInterval) {
-    clearInterval(scrollInterval);
-    scrollInterval = null;
+  if (videoElement) {
+    videoElement.removeEventListener('ended', onVideoEnded);
+  }
+  if (observer) {
+    observer.disconnect();
+    observer = null;
   }
 }
 
