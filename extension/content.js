@@ -4,25 +4,24 @@ let videoElement = null;
 let observer = null;
 
 function findVideoElement() {
+  // Try to find Shorts/Reels video first
+  let shortsVideo = document.querySelector('video[src*="googlevideo"]');
+  if (shortsVideo) return shortsVideo;
+  // Fallback to any video tag
   return document.querySelector('video');
 }
 
 function scrollToNextReel() {
-  // Try to find the next reel/video element and scroll to it
-  // For YouTube Shorts/Reels, next video is usually below
-  // This logic may need adjustment for different layouts
-  const reels = document.querySelectorAll('ytd-reel-video-renderer, ytd-rich-item-renderer, ytd-video-renderer');
-  let foundCurrent = false;
-  for (let reel of reels) {
-    if (foundCurrent) {
-      reel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // For YouTube Shorts, next reel is usually in the next ytd-reel-video-renderer
+  let currentReel = document.querySelector('ytd-reel-video-renderer[is-active]');
+  if (currentReel) {
+    let nextReel = currentReel.nextElementSibling;
+    if (nextReel) {
+      nextReel.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
-    if (reel.contains(videoElement)) {
-      foundCurrent = true;
-    }
   }
-  // Fallback: scroll down by a large amount
+  // For regular videos, scroll down by a large amount
   window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' });
 }
 
@@ -72,10 +71,10 @@ function toggleAutoScroll() {
   autoScrollActive = !autoScrollActive;
   if (autoScrollActive) {
     startAutoScroll();
-    toggleBtn.textContent = 'Stop Auto-Scroll';
+    window.toggleBtn.textContent = 'Stop Auto-Scroll';
   } else {
     stopAutoScroll();
-    toggleBtn.textContent = 'Start Auto-Scroll';
+    window.toggleBtn.textContent = 'Start Auto-Scroll';
   }
 }
 
@@ -101,7 +100,6 @@ function injectToggleButton() {
   window.toggleBtn = toggleBtn;
 }
 
-// Try to inject the button on page load and when navigating
 function tryInjectButton() {
   injectToggleButton();
 }
