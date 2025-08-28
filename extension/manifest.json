@@ -1,26 +1,18 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Auto Scroller",
+  "name": "YouTube Shorts Auto Scroller",
   "version": "1.0",
-  "description": "Automatically scrolls YouTube videos without keyboard input.",
+  "description": "Automatically scrolls to the next YouTube Short after playback.",
   "permissions": ["scripting"],
   "host_permissions": ["https://www.youtube.com/*"],
-  "background": {
-    "service_worker": "background.js"
-  },
   "content_scripts": [
     {
       "matches": [
-        "https://www.youtube.com/*",
         "https://www.youtube.com/shorts/*",
-        "https://www.youtube.com/watch*",
-        "https://www.youtube.com/reel/*"
+        "https://www.youtube.com/watch*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle"
     }
-  ],
-  "action": {
-    "default_title": "Auto Scroll YouTube"
-  }
+  ]
 }
