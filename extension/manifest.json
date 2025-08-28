@@ -12,9 +12,12 @@
     {
       "matches": [
         "https://www.youtube.com/*",
-        "https://www.youtube.com/shorts/*"
+        "https://www.youtube.com/shorts/*",
+        "https://www.youtube.com/watch*",
+        "https://www.youtube.com/reel/*"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "run_at": "document_idle"
     }
   ],
   "action": {

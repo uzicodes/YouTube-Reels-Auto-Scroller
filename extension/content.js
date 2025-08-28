@@ -16,7 +16,7 @@ function findVideoElement() {
     console.log('[AutoScroll] Fallback video detected:', fallbackVideo);
   }
   return fallbackVideo;
-}
+// ...existing code...
 
 function scrollToNextReel() {
   // For Shorts, try to find the next Shorts video in the DOM
@@ -126,6 +126,21 @@ function tryInjectButton() {
   injectToggleButton();
 }
 
-tryInjectButton();
-document.addEventListener('yt-navigate-finish', tryInjectButton);
-document.addEventListener('DOMContentLoaded', tryInjectButton);
+console.log('[AutoScroll] Content script loaded');
+
+// Add a visible test element to confirm script execution
+const testDiv = document.createElement('div');
+testDiv.textContent = '[AutoScroll] Script is running';
+testDiv.style.position = 'fixed';
+testDiv.style.bottom = '10px';
+testDiv.style.left = '10px';
+testDiv.style.background = '#222';
+testDiv.style.color = '#fff';
+testDiv.style.padding = '4px 8px';
+testDiv.style.zIndex = '99999';
+testDiv.style.fontSize = '12px';
+document.body.appendChild(testDiv);
+
+setTimeout(tryInjectButton, 1000);
+document.addEventListener('yt-navigate-finish', () => setTimeout(tryInjectButton, 1000));
+document.addEventListener('DOMContentLoaded', () => setTimeout(tryInjectButton, 1000));
