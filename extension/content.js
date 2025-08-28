@@ -6,9 +6,16 @@ let observer = null;
 function findVideoElement() {
   // For Shorts, the video is inside .html5-video-player or .shorts-player-container
   let shortsVideo = document.querySelector('.shorts-player-container video, .html5-video-player video');
-  if (shortsVideo) return shortsVideo;
+  if (shortsVideo) {
+    console.log('[AutoScroll] Shorts video detected:', shortsVideo);
+    return shortsVideo;
+  }
   // Fallback to any video tag
-  return document.querySelector('video');
+  let fallbackVideo = document.querySelector('video');
+  if (fallbackVideo) {
+    console.log('[AutoScroll] Fallback video detected:', fallbackVideo);
+  }
+  return fallbackVideo;
 }
 
 function scrollToNextReel() {
@@ -17,6 +24,7 @@ function scrollToNextReel() {
   let foundCurrent = false;
   for (let item of shortsItems) {
     if (foundCurrent) {
+      console.log('[AutoScroll] Scrolling to next Shorts item:', item);
       item.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
@@ -25,10 +33,12 @@ function scrollToNextReel() {
     }
   }
   // Fallback: scroll down by a large amount
+  console.log('[AutoScroll] Fallback scroll down');
   window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' });
 }
 
 function onVideoEnded() {
+  console.log('[AutoScroll] Video ended event fired');
   if (autoScrollActive) {
     scrollToNextReel();
     setTimeout(() => {
@@ -41,10 +51,12 @@ function onVideoEnded() {
   }
 }
 
-function startAutoScroll() {
   videoElement = findVideoElement();
   if (videoElement) {
+    console.log('[AutoScroll] Adding ended event listener to video:', videoElement);
     videoElement.addEventListener('ended', onVideoEnded);
+  } else {
+    console.log('[AutoScroll] No video element found to add ended event listener');
   }
   // Observe for video changes (e.g., when user scrolls manually)
   if (!observer) {
@@ -53,7 +65,10 @@ function startAutoScroll() {
       if (newVideo !== videoElement) {
         if (videoElement) videoElement.removeEventListener('ended', onVideoEnded);
         videoElement = newVideo;
-        if (videoElement) videoElement.addEventListener('ended', onVideoEnded);
+        if (videoElement) {
+          console.log('[AutoScroll] Video changed, adding ended event listener:', videoElement);
+          videoElement.addEventListener('ended', onVideoEnded);
+        }
       }
     });
     observer.observe(document.body, { childList: true, subtree: true });
@@ -82,7 +97,11 @@ function toggleAutoScroll() {
 }
 
 function injectToggleButton() {
-  if (document.getElementById('yt-auto-scroll-btn')) return;
+  if (document.getElementById('yt-auto-scroll-btn')) {
+    console.log('[AutoScroll] Toggle button already exists');
+    return;
+  }
+  console.log('[AutoScroll] Injecting toggle button');
   const toggleBtn = document.createElement('button');
   toggleBtn.id = 'yt-auto-scroll-btn';
   toggleBtn.textContent = 'Start Auto-Scroll';
