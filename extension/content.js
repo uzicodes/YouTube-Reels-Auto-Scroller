@@ -4,24 +4,27 @@ let videoElement = null;
 let observer = null;
 
 function findVideoElement() {
-  // Try to find Shorts/Reels video first
-  let shortsVideo = document.querySelector('video[src*="googlevideo"]');
+  // For Shorts, the video is inside .html5-video-player or .shorts-player-container
+  let shortsVideo = document.querySelector('.shorts-player-container video, .html5-video-player video');
   if (shortsVideo) return shortsVideo;
   // Fallback to any video tag
   return document.querySelector('video');
 }
 
 function scrollToNextReel() {
-  // For YouTube Shorts, next reel is usually in the next ytd-reel-video-renderer
-  let currentReel = document.querySelector('ytd-reel-video-renderer[is-active]');
-  if (currentReel) {
-    let nextReel = currentReel.nextElementSibling;
-    if (nextReel) {
-      nextReel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  // For Shorts, try to find the next Shorts video in the DOM
+  const shortsItems = document.querySelectorAll('ytd-reel-video-renderer, ytd-reel-item-renderer');
+  let foundCurrent = false;
+  for (let item of shortsItems) {
+    if (foundCurrent) {
+      item.scrollIntoView({ behavior: 'smooth', block: 'center' });
       return;
     }
+    if (item.contains(videoElement)) {
+      foundCurrent = true;
+    }
   }
-  // For regular videos, scroll down by a large amount
+  // Fallback: scroll down by a large amount
   window.scrollBy({ top: window.innerHeight, left: 0, behavior: 'smooth' });
 }
 
