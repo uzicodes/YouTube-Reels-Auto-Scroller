@@ -79,20 +79,33 @@ function toggleAutoScroll() {
   }
 }
 
-// Create toggle button
-const toggleBtn = document.createElement('button');
-toggleBtn.textContent = 'Start Auto-Scroll';
-toggleBtn.style.position = 'fixed';
-toggleBtn.style.top = '20px';
-toggleBtn.style.right = '20px';
-toggleBtn.style.zIndex = '9999';
-toggleBtn.style.padding = '10px 20px';
-toggleBtn.style.background = '#ff0000';
-toggleBtn.style.color = '#fff';
-toggleBtn.style.border = 'none';
-toggleBtn.style.borderRadius = '5px';
-toggleBtn.style.cursor = 'pointer';
-toggleBtn.style.fontSize = '16px';
-toggleBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
-toggleBtn.addEventListener('click', toggleAutoScroll);
-document.body.appendChild(toggleBtn);
+function injectToggleButton() {
+  if (document.getElementById('yt-auto-scroll-btn')) return;
+  const toggleBtn = document.createElement('button');
+  toggleBtn.id = 'yt-auto-scroll-btn';
+  toggleBtn.textContent = 'Start Auto-Scroll';
+  toggleBtn.style.position = 'fixed';
+  toggleBtn.style.top = '20px';
+  toggleBtn.style.right = '20px';
+  toggleBtn.style.zIndex = '9999';
+  toggleBtn.style.padding = '10px 20px';
+  toggleBtn.style.background = '#ff0000';
+  toggleBtn.style.color = '#fff';
+  toggleBtn.style.border = 'none';
+  toggleBtn.style.borderRadius = '5px';
+  toggleBtn.style.cursor = 'pointer';
+  toggleBtn.style.fontSize = '16px';
+  toggleBtn.style.boxShadow = '0 2px 6px rgba(0,0,0,0.2)';
+  toggleBtn.addEventListener('click', toggleAutoScroll);
+  document.body.appendChild(toggleBtn);
+  window.toggleBtn = toggleBtn;
+}
+
+// Try to inject the button on page load and when navigating
+function tryInjectButton() {
+  injectToggleButton();
+}
+
+tryInjectButton();
+document.addEventListener('yt-navigate-finish', tryInjectButton);
+document.addEventListener('DOMContentLoaded', tryInjectButton);
